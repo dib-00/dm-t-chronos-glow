@@ -84,8 +84,19 @@ const Hero = () => {
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
       
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-hero" />
+      {/* Fullscreen Spline 3D Background */}
+      <div ref={splineRef} className="absolute inset-0">
+        <iframe 
+          src='https://my.spline.design/retrofuturisticcircuitloop-lWAjhe1YBswHO5xm9HyZSHjS/' 
+          frameBorder='0' 
+          width='100%' 
+          height='100%'
+          className="w-full h-full object-cover"
+          title="3D Electronics Scene"
+        />
+        {/* Overlay for content readability */}
+        <div className="absolute inset-0 bg-background/30 backdrop-blur-[1px]" />
+      </div>
       
       {/* Floating Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -94,10 +105,10 @@ const Hero = () => {
         <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-secondary/10 rounded-full blur-3xl animate-float-slow" />
       </div>
 
-      <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+      <div className="container mx-auto px-4 flex items-center justify-center text-center relative z-10">
         
-        {/* Left Content */}
-        <div className="text-center lg:text-left space-y-8">
+        {/* Centered Content */}
+        <div className="max-w-4xl space-y-8">
           
           {/* Main Headline */}
           <h1 ref={headlineRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
@@ -107,17 +118,17 @@ const Hero = () => {
           </h1>
 
           {/* Subtext */}
-          <p ref={subtextRef} className="text-lg sm:text-xl text-muted-foreground font-light max-w-2xl">
+          <p ref={subtextRef} className="text-lg sm:text-xl text-muted-foreground font-light max-w-2xl mx-auto">
             Smartphones, Laptops, Tablets & More. Same-day diagnostics with certified technicians using genuine parts.
           </p>
 
           {/* CTA Buttons */}
-          <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-gradient-primary hover:shadow-glow glow-hover text-lg px-8 py-4">
               <Calendar size={20} weight="bold" className="mr-3" />
               Book a Repair
             </Button>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-center">
               <Button variant="outline" size="lg" className="glass-subtle hover:glass border-glass-border">
                 <Phone size={20} weight="bold" className="mr-2" />
                 Call Now
@@ -130,7 +141,7 @@ const Hero = () => {
           </div>
 
           {/* Trust Badges */}
-          <div ref={badgesRef} className="flex flex-wrap gap-4 justify-center lg:justify-start">
+          <div ref={badgesRef} className="flex flex-wrap gap-4 justify-center">
             {trustBadges.map((badge, index) => (
               <div key={index} className="glass-subtle rounded-full px-4 py-2 flex items-center space-x-2 hover:glass transition-all duration-300">
                 <badge.icon size={16} className="text-primary" weight="bold" />
@@ -142,7 +153,7 @@ const Hero = () => {
           {/* Brands We Service */}
           <div ref={brandsRef} className="space-y-3">
             <p className="text-sm text-muted-foreground font-medium">Brands we service:</p>
-            <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-3 justify-center">
               {brands.map((brand, index) => (
                 <span key={index} className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors cursor-default">
                   {brand}
@@ -150,23 +161,6 @@ const Hero = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Right Content - Spline 3D */}
-        <div ref={splineRef} className="relative h-[400px] sm:h-[500px] lg:h-[600px]">
-          <div className="absolute inset-0 glass rounded-2xl overflow-hidden shadow-glass">
-            <iframe 
-              src='https://my.spline.design/retrofuturisticcircuitloop-lWAjhe1YBswHO5xm9HyZSHjS/' 
-              frameBorder='0' 
-              width='100%' 
-              height='100%'
-              className="rounded-2xl"
-              title="3D Electronics Scene"
-            />
-          </div>
-          
-          {/* Overlay glow */}
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary/20 via-transparent to-transparent pointer-events-none" />
         </div>
       </div>
 

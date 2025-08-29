@@ -124,11 +124,21 @@ const Navigation = () => {
                 Book a Repair
               </Button>
               <div className="flex space-x-3">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => window.open('tel:+917003920793')}
+                >
                   <Phone size={16} weight="bold" className="mr-2" />
                   Call
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => window.open('https://wa.me/917003920793')}
+                >
                   <WhatsappLogo size={16} weight="bold" className="mr-2" />
                   WhatsApp
                 </Button>
@@ -141,11 +151,21 @@ const Navigation = () => {
       {/* Mobile Sticky CTA Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden glass border-t border-glass-border">
         <div className="flex items-center justify-between p-4 space-x-3">
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1"
+            onClick={() => window.open('tel:+917003920793')}
+          >
             <Phone size={16} weight="bold" className="mr-2" />
             Call
           </Button>
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex-1"
+            onClick={() => window.open('https://wa.me/917003920793')}
+          >
             <WhatsappLogo size={16} weight="bold" className="mr-2" />
             WhatsApp
           </Button>

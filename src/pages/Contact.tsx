@@ -40,16 +40,16 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Call Us",
-      info: "+91 98765 43210",
+      info: "+91 7003920793",
       subInfo: "Mon-Sat 9AM-8PM",
-      action: "tel:+919876543210"
+      action: "tel:+917003920793"
     },
     {
       icon: WhatsappLogo,
       title: "WhatsApp",
-      info: "+91 98765 43210", 
+      info: "+91 7003920793", 
       subInfo: "Quick response guaranteed",
-      action: "https://wa.me/919876543210"
+      action: "https://wa.me/917003920793"
     },
     {
       icon: EnvelopeSimple,
@@ -263,7 +263,7 @@ const Contact = () => {
             <div className="grid grid-cols-2 gap-4">
               <Button 
                 className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => window.open('https://wa.me/919876543210', '_blank')}
+                onClick={() => window.open('https://wa.me/917003920793', '_blank')}
               >
                 <WhatsappLogo size={20} weight="bold" className="mr-2" />
                 WhatsApp
@@ -271,7 +271,7 @@ const Contact = () => {
               <Button 
                 variant="outline"
                 className="glass-subtle hover:glass"
-                onClick={() => window.open('tel:+919876543210')}
+                onClick={() => window.open('tel:+917003920793')}
               >
                 <Phone size={20} weight="bold" className="mr-2" />
                 Call Now

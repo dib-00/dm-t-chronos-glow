@@ -129,11 +129,21 @@ const Hero = () => {
               Book a Repair
             </Button>
             <div className="flex gap-3 justify-center">
-              <Button variant="outline" size="lg" className="glass-subtle hover:glass border-glass-border">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="glass-subtle hover:glass border-glass-border"
+                onClick={() => window.open('tel:+917003920793')}
+              >
                 <Phone size={20} weight="bold" className="mr-2" />
                 Call Now
               </Button>
-              <Button variant="outline" size="lg" className="glass-subtle hover:glass border-glass-border">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="glass-subtle hover:glass border-glass-border"
+                onClick={() => window.open('https://wa.me/917003920793')}
+              >
                 <WhatsappLogo size={20} weight="bold" className="mr-2" />
                 WhatsApp
               </Button>

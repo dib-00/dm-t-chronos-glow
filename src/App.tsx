@@ -13,6 +13,12 @@ import Gallery from "./pages/Gallery";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./hooks/useAuth";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminServices from "./pages/admin/AdminServices";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 const queryClient = new QueryClient();
 
@@ -35,36 +41,47 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        
-        {/* Preloader */}
-        {isLoading && siteReady && (
-          <Preloader onComplete={handlePreloaderComplete} />
-        )}
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          
+          {/* Preloader */}
+          {isLoading && siteReady && (
+            <Preloader onComplete={handlePreloaderComplete} />
+          )}
 
-        {/* Main Site */}
-        <div 
-          className={`site transition-all duration-1000 ${
-            isLoading ? 'opacity-0 blur-sm' : 'opacity-100 blur-none'
-          }`}
-        >
-          <BrowserRouter>
-            <Navigation />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </div>
-      </TooltipProvider>
+          {/* Main Site */}
+          <div 
+            className={`site transition-all duration-1000 ${
+              isLoading ? 'opacity-0 blur-sm' : 'opacity-100 blur-none'
+            }`}
+          >
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<><Navigation /><Home /></>} />
+                <Route path="/services" element={<><Navigation /><Services /></>} />
+                <Route path="/pricing" element={<><Navigation /><Pricing /></>} />
+                <Route path="/gallery" element={<><Navigation /><Gallery /></>} />
+                <Route path="/about" element={<><Navigation /><About /></>} />
+                <Route path="/contact" element={<><Navigation /><Contact /></>} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="services" element={<AdminServices />} />
+                  <Route path="messages" element={<AdminMessages />} />
+                </Route>
+                
+                {/* Catch-all */}
+                <Route path="*" element={<><Navigation /><NotFound /></>} />
+              </Routes>
+            </BrowserRouter>
+          </div>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

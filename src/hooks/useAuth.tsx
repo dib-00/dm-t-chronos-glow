@@ -39,11 +39,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Fetch profile data when user logs in
         if (session?.user) {
           setTimeout(async () => {
-            const { data: profileData } = await supabase
+            const { data: profileData, error } = await supabase
               .from('profiles')
               .select('*')
               .eq('user_id', session.user.id)
               .maybeSingle();
+            
+            if (error) {
+              console.error('Error fetching profile:', error);
+            }
             
             setProfile(profileData);
             setIsLoading(false);
@@ -56,9 +60,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Fetch profile for existing session
+      if (session?.user) {
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+        }
+        
+        setProfile(profileData);
+      }
+      
       setIsLoading(false);
     });
 

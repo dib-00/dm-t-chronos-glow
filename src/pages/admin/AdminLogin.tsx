@@ -20,7 +20,9 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('AdminLogin useEffect:', { user, profile: user?.id, isAdminResult: isAdmin() });
     if (user && isAdmin()) {
+      console.log('Redirecting to /admin');
       navigate('/admin');
     }
   }, [user, isAdmin, navigate]);

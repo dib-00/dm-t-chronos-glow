@@ -45,6 +45,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .eq('user_id', session.user.id)
               .maybeSingle();
             
+            console.log('Profile fetch result:', { profileData, error, userId: session.user.id });
+            
             if (error) {
               console.error('Error fetching profile:', error);
             }
@@ -71,6 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .select('*')
           .eq('user_id', session.user.id)
           .maybeSingle();
+        
+        console.log('Profile fetch (existing session):', { profileData, error, userId: session.user.id });
         
         if (error) {
           console.error('Error fetching profile:', error);
@@ -112,6 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isAdmin = () => {
+    console.log('isAdmin check:', { profile, role: profile?.role, result: profile?.role === 'admin' });
     return profile?.role === 'admin';
   };
 

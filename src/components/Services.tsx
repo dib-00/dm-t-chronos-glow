@@ -182,6 +182,7 @@ const Services = () => {
                     variant="ghost" 
                     size="sm" 
                     className="group/btn p-0 h-auto text-primary hover:text-accent transition-colors duration-300"
+                    onClick={() => window.location.href = '/contact'}
                   >
                     Book Now
                     <ArrowRight 

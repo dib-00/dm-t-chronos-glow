@@ -18,6 +18,11 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminServices from "./pages/admin/AdminServices";
+import AdminPricing from "./pages/admin/AdminPricing";
+import AdminGallery from "./pages/admin/AdminGallery";
+import AdminAbout from "./pages/admin/AdminAbout";
+import AdminContact from "./pages/admin/AdminContact";
+import AdminSettings from "./pages/admin/AdminSettings";
 import AdminMessages from "./pages/admin/AdminMessages";
 
 const queryClient = new QueryClient();
@@ -72,6 +77,11 @@ const App = () => {
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="services" element={<AdminServices />} />
+                  <Route path="pricing" element={<AdminPricing />} />
+                  <Route path="gallery" element={<AdminGallery />} />
+                  <Route path="about" element={<AdminAbout />} />
+                  <Route path="contact" element={<AdminContact />} />
+                  <Route path="settings" element={<AdminSettings />} />
                   <Route path="messages" element={<AdminMessages />} />
                 </Route>
                 

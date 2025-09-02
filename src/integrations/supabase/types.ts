@@ -176,6 +176,57 @@ export type Database = {
         }
         Relationships: []
       }
+      home_content: {
+        Row: {
+          background_url: string | null
+          created_at: string
+          cta_primary_text: string | null
+          cta_secondary_text: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          metadata: Json | null
+          section_key: string
+          subtitle: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_url?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_secondary_text?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json | null
+          section_key: string
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_url?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_secondary_text?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          metadata?: Json | null
+          section_key?: string
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           created_at: string

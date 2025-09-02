@@ -31,6 +31,7 @@ import {
 
 const adminMenuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
+  { title: 'Home Page', url: '/admin/home', icon: LayoutDashboard },
   { title: 'Services', url: '/admin/services', icon: Wrench },
   { title: 'Pricing', url: '/admin/pricing', icon: DollarSign },
   { title: 'Gallery', url: '/admin/gallery', icon: Image },

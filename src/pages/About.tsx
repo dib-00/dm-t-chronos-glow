@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { 
   Medal,
   Clock,
@@ -11,6 +12,8 @@ import {
 } from 'phosphor-react';
 
 const About = () => {
+  const navigate = useNavigate();
+  
   const skills = [
     { icon: Wrench, title: "Micro-Soldering", description: "BGA rework & component-level repair" },
     { icon: Lightning, title: "Fast Turnaround", description: "Most repairs completed same day" },
@@ -187,7 +190,11 @@ const About = () => {
             Join thousands of satisfied customers who trust Dm T Repairs with their devices
           </p>
           
-          <Button size="lg" className="bg-gradient-primary hover:shadow-glow">
+          <Button 
+            size="lg" 
+            className="bg-gradient-primary hover:shadow-glow"
+            onClick={() => navigate('/contact')}
+          >
             Get Your Free Diagnosis Today
           </Button>
         </div>

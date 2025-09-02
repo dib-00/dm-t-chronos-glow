@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   DeviceMobile, 
@@ -13,6 +13,7 @@ import {
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -76,7 +77,11 @@ const Navigation = () => {
                 <Phone size={16} weight="bold" className="mr-2" />
                 Call Now
               </Button>
-              <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
+              <Button 
+                size="sm" 
+                className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                onClick={() => navigate('/contact')}
+              >
                 <Calendar size={16} weight="bold" className="mr-2" />
                 Book Repair
               </Button>
@@ -119,7 +124,10 @@ const Navigation = () => {
 
             {/* Mobile CTA Buttons */}
             <div className="space-y-4 w-full max-w-xs px-8">
-              <Button className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300">
+              <Button 
+                className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                onClick={() => navigate('/contact')}
+              >
                 <Calendar size={20} weight="bold" className="mr-2" />
                 Book a Repair
               </Button>

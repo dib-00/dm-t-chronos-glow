@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
   Phone, 
@@ -14,7 +16,16 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface HomeContent {
+  title: string;
+  subtitle: string;
+  description: string;
+  cta_primary_text: string;
+  cta_secondary_text: string;
+}
+
 const Hero = () => {
+  const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subtextRef = useRef<HTMLParagraphElement>(null);
@@ -22,6 +33,64 @@ const Hero = () => {
   const splineRef = useRef<HTMLDivElement>(null);
   const badgesRef = useRef<HTMLDivElement>(null);
   const brandsRef = useRef<HTMLDivElement>(null);
+  
+  const [content, setContent] = useState<HomeContent>({
+    title: 'Fast, Expert',
+    subtitle: 'Electronics Repair',
+    description: 'Smartphones, Laptops, Tablets & More. Same-day diagnostics with certified technicians using genuine parts.',
+    cta_primary_text: 'Book a Repair',
+    cta_secondary_text: 'Call Now'
+  });
+
+  useEffect(() => {
+    fetchHomeContent();
+    setupRealtimeSubscription();
+  }, []);
+
+  const fetchHomeContent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('home_content')
+        .select('*')
+        .eq('section_key', 'hero')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setContent({
+          title: data.title || 'Fast, Expert',
+          subtitle: data.subtitle || 'Electronics Repair',
+          description: data.description || 'Smartphones, Laptops, Tablets & More. Same-day diagnostics with certified technicians using genuine parts.',
+          cta_primary_text: data.cta_primary_text || 'Book a Repair',
+          cta_secondary_text: data.cta_secondary_text || 'Call Now'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching home content:', error);
+    }
+  };
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('hero_content_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'home_content'
+        },
+        () => {
+          fetchHomeContent();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   useEffect(() => {
     const tl = gsap.timeline({ delay: 0.5 });
@@ -112,21 +181,25 @@ const Hero = () => {
           
           {/* Main Headline */}
           <h1 ref={headlineRef} className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-            <span className="text-gradient">Fast, Expert</span>
+            <span className="text-gradient">{content.title}</span>
             <br />
-            <span className="text-foreground">Electronics Repair</span>
+            <span className="text-foreground">{content.subtitle}</span>
           </h1>
 
           {/* Subtext */}
           <p ref={subtextRef} className="text-lg sm:text-xl text-muted-foreground font-light max-w-2xl mx-auto">
-            Smartphones, Laptops, Tablets & More. Same-day diagnostics with certified technicians using genuine parts.
+            {content.description}
           </p>
 
           {/* CTA Buttons */}
           <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-primary hover:shadow-glow glow-hover text-lg px-8 py-4">
+            <Button 
+              size="lg" 
+              className="bg-gradient-primary hover:shadow-glow glow-hover text-lg px-8 py-4"
+              onClick={() => navigate('/contact')}
+            >
               <Calendar size={20} weight="bold" className="mr-3" />
-              Book a Repair
+              {content.cta_primary_text}
             </Button>
             <div className="flex gap-3 justify-center">
               <Button 

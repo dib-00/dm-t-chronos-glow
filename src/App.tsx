@@ -17,6 +17,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminHome from "./pages/admin/AdminHome";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminGallery from "./pages/admin/AdminGallery";
@@ -76,6 +77,7 @@ const App = () => {
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="home" element={<AdminHome />} />
                   <Route path="services" element={<AdminServices />} />
                   <Route path="pricing" element={<AdminPricing />} />
                   <Route path="gallery" element={<AdminGallery />} />

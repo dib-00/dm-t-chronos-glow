@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MapPin, 
   Phone, 
@@ -65,12 +66,47 @@ const HomeContact = () => {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Note: Telegram integration requires backend functionality
-    console.log('Form submitted:', formData);
-    alert('Thank you for your message! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    
+    try {
+      // Save to Supabase database
+      const { error: dbError } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          status: 'new',
+          is_read: false
+        });
+
+      if (dbError) throw dbError;
+
+      // Send to Telegram
+      const { error: telegramError } = await supabase.functions.invoke('send-telegram-message', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message
+        }
+      });
+
+      if (telegramError) {
+        console.error('Telegram error:', telegramError);
+        // Don't fail the whole process if Telegram fails
+      }
+
+      // Show success message
+      alert('✅ Thank you, we\'ll get back to you soon.');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Sorry, there was an error submitting your message. Please try again.');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

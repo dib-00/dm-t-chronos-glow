@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
 
 const Gallery = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = [
     { id: 'all', label: 'All Repairs' },
@@ -173,7 +176,11 @@ const Gallery = () => {
           <p className="text-muted-foreground mb-6">
             Join thousands of satisfied customers who trust us with their electronics
           </p>
-          <Button size="lg" className="bg-gradient-primary hover:shadow-glow">
+          <Button 
+            size="lg" 
+            className="bg-gradient-primary hover:shadow-glow"
+            onClick={() => navigate('/contact')}
+          >
             Book Your Repair Today
           </Button>
         </div>

@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   MapPin,
   Phone,
@@ -11,6 +13,7 @@ import {
 } from 'phosphor-react';
 
 const Contact = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,12 +24,85 @@ const Contact = () => {
   });
   
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Check for service parameter in URL and auto-fill issue field
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const service = urlParams.get('service');
+    if (service) {
+      setFormData(prev => ({
+        ...prev,
+        issue: service
+      }));
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
+    setIsSubmitting(true);
+    
+    try {
+      // Save to Supabase
+      const { error: dbError } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          device_type: formData.device,
+          issue_type: formData.issue,
+          message: formData.message
+        });
+
+      if (dbError) throw dbError;
+
+      // Send to Telegram
+      const { error: telegramError } = await supabase.functions.invoke('send-telegram-message', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          device_type: formData.device,
+          issue_type: formData.issue,
+          message: formData.message
+        }
+      });
+
+      if (telegramError) {
+        console.error('Telegram error:', telegramError);
+        // Don't throw error for Telegram failure, just log it
+      }
+
+      // Show success message
+      setIsSubmitted(true);
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        device: '',
+        issue: '',
+        message: ''
+      });
+
+      toast({
+        title: "✅ Thank you!",
+        description: "We'll get back to you soon.",
+        duration: 5000,
+      });
+
+      setTimeout(() => setIsSubmitted(false), 5000);
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit form. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -98,9 +174,9 @@ const Contact = () => {
             {isSubmitted ? (
               <div className="text-center py-12">
                 <CheckCircle size={64} className="text-green-500 mx-auto mb-4" weight="fill" />
-                <h3 className="text-xl font-bold mb-2">Request Submitted!</h3>
+                <h3 className="text-xl font-bold mb-2">✅ Thank you!</h3>
                 <p className="text-muted-foreground">
-                  We'll contact you within 30 minutes to confirm your booking.
+                  We'll get back to you soon.
                 </p>
               </div>
             ) : (
@@ -179,13 +255,14 @@ const Contact = () => {
                     className="w-full glass rounded-xl px-4 py-3 border border-glass-border focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 bg-background text-foreground"
                   >
                     <option value="">Select issue type</option>
-                    <option value="Screen/Display">Screen/Display Issue</option>
-                    <option value="Battery">Battery Problem</option>
-                    <option value="Water Damage">Water Damage</option>
-                    <option value="Charging">Charging Issues</option>
-                    <option value="Audio">Audio Problems</option>
-                    <option value="Camera">Camera Issues</option>
-                    <option value="Performance">Performance/Software</option>
+                    <option value="Screen & Glass Replacement">Screen & Glass Replacement</option>
+                    <option value="Battery & Charging Fixes">Battery & Charging Fixes</option>
+                    <option value="Water Damage Recovery">Water Damage Recovery</option>
+                    <option value="Motherboard & Micro-Soldering">Motherboard & Micro-Soldering</option>
+                    <option value="Laptop Services">Laptop Services</option>
+                    <option value="Data Recovery & Backup">Data Recovery & Backup</option>
+                    <option value="Diagnostics & Tune-ups">Diagnostics & Tune-ups</option>
+                    <option value="Custom Requests">Custom Requests</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -207,10 +284,11 @@ const Contact = () => {
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300 disabled:opacity-50"
                 >
                   <Calendar size={20} weight="bold" className="mr-2" />
-                  Book Free Diagnosis
+                  {isSubmitting ? 'Submitting...' : 'Book Free Diagnosis'}
                 </Button>
               </form>
             )}

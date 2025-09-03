@@ -10,6 +10,8 @@ interface TelegramMessageRequest {
   email: string;
   phone?: string;
   message: string;
+  device_type?: string;
+  issue_type?: string;
 }
 
 serve(async (req) => {
@@ -20,20 +22,34 @@ serve(async (req) => {
 
   try {
     const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
-    const chatId = '8274639913';
+    const chatId = '-1002445258992'; // Use your actual chat ID
 
     if (!botToken) {
       throw new Error('TELEGRAM_BOT_TOKEN environment variable is not set');
     }
 
-    const { name, email, phone, message }: TelegramMessageRequest = await req.json();
+    const { name, email, phone, message, device_type, issue_type }: TelegramMessageRequest = await req.json();
+
+    // Get current timestamp
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
 
     // Format the message for Telegram
-    const telegramMessage = `📩 New Website Inquiry
-Name: ${name}
-Email: ${email}
-Phone: ${phone || 'Not provided'}
-Message: ${message}`;
+    const telegramMessage = `📩 New Service Request
+👤 Name: ${name}
+📧 Email: ${email}
+📱 Phone: ${phone || 'Not provided'}
+🔧 Issue: ${issue_type || 'Not specified'}
+📝 Message: ${message}
+⏰ Time: ${timestamp}`;
 
     // Send message to Telegram
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;

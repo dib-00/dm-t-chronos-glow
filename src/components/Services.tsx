@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { 
   DeviceMobile,
@@ -16,12 +17,69 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  short_description?: string;
+  features: string[];
+  icon: string;
+  price_from?: number;
+  duration?: string;
+  is_active: boolean;
+}
+
 const Services = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch services from database
   useEffect(() => {
+    fetchServices();
+    
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('services-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'services'
+      }, () => {
+        fetchServices();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      
+      setServices(data || fallbackServices);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      setServices(fallbackServices);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Animation effects
+  useEffect(() => {
+    if (isLoading) return;
+
     // Title animation
     gsap.fromTo(titleRef.current,
       { opacity: 0, y: 50, filter: 'blur(5px)' },
@@ -62,66 +120,103 @@ const Services = () => {
     return () => {
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
-  }, []);
+  }, [isLoading]);
 
-  const services = [
+  // Fallback services data (used if database is unavailable)
+  const fallbackServices = [
     {
-      icon: DeviceMobile,
+      id: '1',
       title: 'Screen & Glass Replacement',
       description: 'Professional screen repairs for phones and tablets with genuine parts and precision installation.',
       features: ['iPhone & Android', 'Same-day service', 'Warranty included'],
-      gradient: 'from-primary to-secondary'
+      icon: 'DeviceMobile',
+      is_active: true
     },
     {
-      icon: BatteryCharging,
+      id: '2',
       title: 'Battery & Charging Fixes',
       description: 'Battery replacement, charging port repair, and power management IC troubleshooting.',
       features: ['Original batteries', 'Charging diagnostics', 'Power optimization'],
-      gradient: 'from-secondary to-accent'
+      icon: 'BatteryCharging',
+      is_active: true
     },
     {
-      icon: Drop,
+      id: '3',
       title: 'Water Damage Recovery',
       description: 'Ultrasonic cleaning, corrosion removal, and complete motherboard restoration services.',
       features: ['Ultrasonic clean', 'Corrosion treatment', 'Data recovery'],
-      gradient: 'from-accent to-neon-cyan'
+      icon: 'Drop',
+      is_active: true
     },
     {
-      icon: Cpu,
+      id: '4',
       title: 'Motherboard & Micro-Soldering',
       description: 'Advanced IC-level repairs, BGA rework, and component-level troubleshooting.',
       features: ['BGA rework', 'IC replacement', 'Circuit repair'],
-      gradient: 'from-neon-cyan to-neon-violet'
+      icon: 'Cpu',
+      is_active: true
     },
     {
-      icon: Laptop,
+      id: '5',
       title: 'Laptop Services',
       description: 'Complete laptop repair including SSD/RAM upgrades, keyboard replacement, and hinge fixes.',
       features: ['Hardware upgrades', 'Keyboard replacement', 'Thermal management'],
-      gradient: 'from-neon-violet to-neon-magenta'
+      icon: 'Laptop',
+      is_active: true
     },
     {
-      icon: HardDrive,
+      id: '6',
       title: 'Data Recovery & Backup',
       description: 'Professional data recovery from damaged phones, hard drives, and SSDs with secure handling.',
       features: ['Phone data recovery', 'HDD/SSD recovery', 'Secure backup'],
-      gradient: 'from-neon-magenta to-primary'
+      icon: 'HardDrive',
+      is_active: true
     },
     {
-      icon: GearSix,
+      id: '7',
       title: 'Diagnostics & Tune-ups',
       description: 'Comprehensive device diagnostics, performance optimization, and thermal management.',
       features: ['Performance testing', 'Thermal analysis', 'Software optimization'],
-      gradient: 'from-primary to-secondary'
+      icon: 'GearSix',
+      is_active: true
     },
     {
-      icon: Question,
+      id: '8',
       title: 'Custom Requests',
       description: 'Specialized repairs and custom modifications. Get a personalized quote within 24 hours.',
       features: ['Custom solutions', '24h quote', 'Specialized repairs'],
-      gradient: 'from-secondary to-accent'
+      icon: 'Question',
+      is_active: true
     }
   ];
+
+  const getServiceIcon = (iconName: string) => {
+    const iconMap: Record<string, any> = {
+      DeviceMobile,
+      BatteryCharging,
+      Drop,
+      Cpu,
+      Laptop,
+      HardDrive,
+      GearSix,
+      Question
+    };
+    return iconMap[iconName] || Question;
+  };
+
+  const getServiceGradient = (index: number) => {
+    const gradients = [
+      'from-primary to-secondary',
+      'from-secondary to-accent',
+      'from-accent to-neon-cyan',
+      'from-neon-cyan to-neon-violet',
+      'from-neon-violet to-neon-magenta',
+      'from-neon-magenta to-primary',
+      'from-primary to-secondary',
+      'from-secondary to-accent'
+    ];
+    return gradients[index % gradients.length];
+  };
 
   return (
     <section ref={sectionRef} className="py-20 lg:py-32 relative overflow-hidden">
@@ -144,61 +239,84 @@ const Services = () => {
         </div>
 
         {/* Services Grid */}
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-          {services.map((service, index) => (
-            <div 
-              key={index}
-              className="group glass hover:glass-subtle rounded-2xl p-6 lg:p-8 shadow-glass hover:shadow-elevation transition-all duration-500 glow-hover cursor-pointer"
-            >
-              
-              {/* Icon with gradient background */}
-              <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${service.gradient} p-4 mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <service.icon size={32} className="text-white" weight="bold" />
-              </div>
-
-              {/* Content */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-foreground group-hover:text-gradient transition-colors duration-300">
-                  {service.title}
-                </h3>
-                
-                <p className="text-muted-foreground font-light leading-relaxed">
-                  {service.description}
-                </p>
-
-                {/* Features */}
-                <ul className="space-y-2">
-                  {service.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 group-hover:bg-accent transition-colors duration-300" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA */}
-                <div className="pt-4">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="group/btn p-0 h-auto text-primary hover:text-accent transition-colors duration-300"
-                    onClick={() => window.location.href = '/contact'}
-                  >
-                    Book Now
-                    <ArrowRight 
-                      size={16} 
-                      className="ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" 
-                      weight="bold" 
-                    />
-                  </Button>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+            {[...Array(8)].map((_, index) => (
+              <div key={index} className="glass rounded-2xl p-6 lg:p-8 shadow-glass animate-pulse">
+                <div className="w-16 h-16 bg-muted rounded-xl mb-6" />
+                <div className="h-6 bg-muted rounded mb-4" />
+                <div className="space-y-2 mb-4">
+                  <div className="h-4 bg-muted rounded" />
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted rounded w-2/3" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                  <div className="h-3 bg-muted rounded w-3/4" />
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+            {services.map((service, index) => {
+              const ServiceIcon = getServiceIcon(service.icon);
+              return (
+                <div 
+                  key={service.id}
+                  className="group glass hover:glass-subtle rounded-2xl p-6 lg:p-8 shadow-glass hover:shadow-elevation transition-all duration-500 glow-hover cursor-pointer"
+                >
+                  
+                  {/* Icon with gradient background */}
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getServiceGradient(index)} p-4 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <ServiceIcon size={32} className="text-white" weight="bold" />
+                  </div>
 
-              {/* Shimmer effect on hover */}
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 shimmer" />
-            </div>
-          ))}
-        </div>
+                  {/* Content */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-gradient transition-colors duration-300">
+                      {service.title}
+                    </h3>
+                    
+                    <p className="text-muted-foreground font-light leading-relaxed">
+                      {service.description}
+                    </p>
+
+                    {/* Features */}
+                    <ul className="space-y-2">
+                      {service.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center text-sm text-muted-foreground">
+                          <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 group-hover:bg-accent transition-colors duration-300" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    <div className="pt-4">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="group/btn p-0 h-auto text-primary hover:text-accent transition-colors duration-300"
+                        onClick={() => window.location.href = `/contact?service=${encodeURIComponent(service.title)}`}
+                      >
+                        Book Now
+                        <ArrowRight 
+                          size={16} 
+                          className="ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" 
+                          weight="bold" 
+                        />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Shimmer effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 shimmer" />
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Bottom CTA */}
         <div className="text-center mt-16 lg:mt-24">

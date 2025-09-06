@@ -9,6 +9,8 @@ import {
   ShieldCheck,
   ArrowRight
 } from 'phosphor-react';
+import { useAboutContent } from '@/hooks/useAboutContent';
+import { Skeleton } from '@/components/ui/skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,6 +18,7 @@ const HomeAbout = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const { content, loading } = useAboutContent();
 
   useEffect(() => {
     gsap.fromTo(contentRef.current,
@@ -57,7 +60,8 @@ const HomeAbout = () => {
     };
   }, []);
 
-  const stats = [
+  // Fallback data for offline scenarios
+  const fallbackStats = [
     {
       icon: Users,
       value: '5000+',
@@ -84,6 +88,16 @@ const HomeAbout = () => {
     }
   ];
 
+  // Get main content and stats from database
+  const mainContent = content.find(item => item.section_key === 'hero') || {
+    title: 'Expert Electronics Repair Since 2009',
+    content: 'We\'re passionate about bringing your devices back to life. Our certified technicians use advanced diagnostic tools and genuine parts to ensure quality repairs that last.'
+  };
+
+  // Get stats from metadata or use fallback
+  const statsContent = content.find(item => item.section_key === 'stats');
+  const displayStats = statsContent?.metadata?.stats || fallbackStats;
+
   return (
     <section id="about" ref={sectionRef} className="py-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-secondary/5" />
@@ -93,20 +107,32 @@ const HomeAbout = () => {
           
           {/* Content */}
           <div ref={contentRef} className="space-y-8">
-            <div>
-              <h2 className="text-4xl font-bold text-gradient mb-6">
-                Expert Electronics Repair Since 2009
-              </h2>
-              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                We're passionate about bringing your devices back to life. Our certified technicians 
-                use advanced diagnostic tools and genuine parts to ensure quality repairs that last.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                From smartphones to laptops, tablets to gaming consoles – we've mastered the art 
-                of electronic restoration. Every repair comes with our comprehensive warranty and 
-                commitment to excellence.
-              </p>
-            </div>
+            {loading ? (
+              <div className="space-y-6">
+                <Skeleton className="h-10 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-32" />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-4xl font-bold text-gradient mb-6">
+                  {mainContent.title}
+                </h2>
+                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                  {mainContent.content}
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  From smartphones to laptops, tablets to gaming consoles – we've mastered the art 
+                  of electronic restoration. Every repair comes with our comprehensive warranty and 
+                  commitment to excellence.
+                </p>
+              </div>
+            )}
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="bg-gradient-primary hover:shadow-glow">
@@ -121,21 +147,32 @@ const HomeAbout = () => {
 
           {/* Stats */}
           <div ref={statsRef} className="grid grid-cols-2 gap-6">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="glass-subtle rounded-xl p-6 hover:glass transition-all duration-300 text-center group"
-              >
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 rounded-full bg-gradient-primary">
-                    <stat.icon size={24} weight="bold" className="text-white" />
-                  </div>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="glass-subtle rounded-xl p-6 text-center">
+                  <Skeleton className="w-12 h-12 rounded-full mx-auto mb-4" />
+                  <Skeleton className="h-6 w-16 mx-auto mb-1" />
+                  <Skeleton className="h-4 w-20 mx-auto mb-2" />
+                  <Skeleton className="h-3 w-24 mx-auto" />
                 </div>
-                <div className="text-2xl font-bold text-gradient mb-1">{stat.value}</div>
-                <div className="font-semibold mb-2">{stat.label}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </div>
-            ))}
+              ))
+            ) : (
+              displayStats.map((stat: any, index: number) => (
+                <div
+                  key={index}
+                  className="glass-subtle rounded-xl p-6 hover:glass transition-all duration-300 text-center group"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 rounded-full bg-gradient-primary">
+                      <stat.icon size={24} weight="bold" className="text-white" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-gradient mb-1">{stat.value}</div>
+                  <div className="font-semibold mb-2">{stat.label}</div>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

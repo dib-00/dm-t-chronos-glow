@@ -1,57 +1,52 @@
 import { Button } from '@/components/ui/button';
 import { Check, Star, Phone, Calendar } from 'phosphor-react';
+import { usePricingPlans } from '@/hooks/usePricingPlans';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Pricing = () => {
-  const pricingCards = [
+  const { plans, loading } = usePricingPlans();
+  
+  // Fallback data for offline scenarios
+  const fallbackCards = [
     {
-      title: "Screen Replacement",
-      price: "From ₹899",
+      id: '1',
+      name: "Screen Replacement",
+      price: 899,
+      currency: "₹",
       description: "iPhone, Android, Tablet screens",
-      features: [
-        "Original quality LCD/OLED",
-        "30-day warranty",
-        "Free installation",
-        "Same-day service"
-      ],
-      popular: false
+      features: ["Original quality LCD/OLED", "30-day warranty", "Free installation", "Same-day service"],
+      is_popular: false
     },
     {
-      title: "Battery Service", 
-      price: "From ₹699",
+      id: '2',
+      name: "Battery Service", 
+      price: 699,
+      currency: "₹",
       description: "Phone & Laptop batteries",
-      features: [
-        "Genuine battery cells",
-        "90-day warranty", 
-        "Health diagnostics",
-        "Quick 2-hour service"
-      ],
-      popular: true
+      features: ["Genuine battery cells", "90-day warranty", "Health diagnostics", "Quick 2-hour service"],
+      is_popular: true
     },
     {
-      title: "Water Damage Recovery",
-      price: "From ₹1299",
+      id: '3',
+      name: "Water Damage Recovery",
+      price: 1299,
+      currency: "₹",
       description: "Complete motherboard cleaning",
-      features: [
-        "Ultrasonic cleaning",
-        "Component replacement",
-        "Data recovery attempt", 
-        "60-day warranty"
-      ],
-      popular: false
+      features: ["Ultrasonic cleaning", "Component replacement", "Data recovery attempt", "60-day warranty"],
+      is_popular: false
     },
     {
-      title: "Laptop Repair",
-      price: "From ₹999", 
+      id: '4',
+      name: "Laptop Repair",
+      price: 999,
+      currency: "₹",
       description: "Hardware & software fixes",
-      features: [
-        "Keyboard replacement",
-        "SSD/RAM upgrades",
-        "Thermal paste service",
-        "180-day warranty"
-      ],
-      popular: false
+      features: ["Keyboard replacement", "SSD/RAM upgrades", "Thermal paste service", "180-day warranty"],
+      is_popular: false
     }
   ];
+
+  const displayPlans = plans.length > 0 ? plans : fallbackCards;
 
   return (
     <main className="min-h-screen pt-20">
@@ -88,41 +83,61 @@ const Pricing = () => {
 
         {/* Pricing Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {pricingCards.map((card, index) => (
-            <div key={index} className={`glass rounded-2xl p-6 shadow-glass relative ${
-              card.popular ? 'ring-2 ring-primary/30' : ''
-            }`}>
-              
-              {card.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-gradient-primary px-4 py-1 rounded-full text-sm font-medium text-primary-foreground">
-                    Most Popular
-                  </span>
+          {loading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="glass rounded-2xl p-6 shadow-glass">
+                <div className="text-center mb-6">
+                  <Skeleton className="h-6 w-32 mx-auto mb-2" />
+                  <Skeleton className="h-8 w-20 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-24 mx-auto" />
                 </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">{card.title}</h3>
-                <div className="text-3xl font-bold text-gradient mb-2">{card.price}</div>
-                <p className="text-sm text-muted-foreground">{card.description}</p>
+                <div className="space-y-3 mb-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-4 w-full" />
+                  ))}
+                </div>
+                <Skeleton className="h-10 w-full" />
               </div>
-
-              <ul className="space-y-3 mb-6">
-                {card.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center text-sm">
-                    <Check size={16} className="text-primary mr-3 flex-shrink-0" weight="bold" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <Button className={`w-full ${
-                card.popular ? 'bg-gradient-primary hover:shadow-glow' : 'variant-outline glass-subtle'
+            ))
+          ) : (
+            displayPlans.map((card, index) => (
+              <div key={card.id} className={`glass rounded-2xl p-6 shadow-glass relative ${
+                card.is_popular ? 'ring-2 ring-primary/30' : ''
               }`}>
-                Get Quote
-              </Button>
-            </div>
-          ))}
+                
+                {card.is_popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-gradient-primary px-4 py-1 rounded-full text-sm font-medium text-primary-foreground">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold mb-2">{card.name}</h3>
+                  <div className="text-3xl font-bold text-gradient mb-2">
+                    From {card.currency || '₹'}{card.price}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                </div>
+
+                <ul className="space-y-3 mb-6">
+                  {card.features?.map((feature, idx) => (
+                    <li key={idx} className="flex items-center text-sm">
+                      <Check size={16} className="text-primary mr-3 flex-shrink-0" weight="bold" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Button className={`w-full ${
+                  card.is_popular ? 'bg-gradient-primary hover:shadow-glow' : 'variant-outline glass-subtle'
+                }`}>
+                  Get Quote
+                </Button>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Warranty Section */}

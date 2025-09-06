@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
+import { useGalleryItems } from '@/hooks/useGalleryItems';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Gallery = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { items, loading } = useGalleryItems();
 
   const categories = [
     { id: 'all', label: 'All Repairs' },
@@ -16,60 +19,75 @@ const Gallery = () => {
     { id: 'motherboard', label: 'Motherboard Repair' }
   ];
 
-  const repairGallery = [
+  // Fallback data for offline scenarios
+  const fallbackGallery = [
     {
-      id: 1,
+      id: '1',
       category: 'screens',
       title: 'iPhone 13 Pro Screen Replacement',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
-      description: 'Cracked OLED display replaced with genuine Apple part'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'Cracked OLED display replaced with genuine Apple part',
+      is_active: true
     },
     {
-      id: 2,
+      id: '2', 
       category: 'water',
       title: 'Samsung Galaxy Water Damage Recovery',
-      before: '/placeholder.svg', 
-      after: '/placeholder.svg',
-      description: 'Complete motherboard cleaning and component replacement'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'Complete motherboard cleaning and component replacement',
+      is_active: true
     },
     {
-      id: 3,
+      id: '3',
       category: 'battery',
       title: 'MacBook Pro Battery Replacement',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg', 
-      description: 'Swollen battery replacement with health diagnostics'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'Swollen battery replacement with health diagnostics',
+      is_active: true
     },
     {
-      id: 4,
+      id: '4',
       category: 'motherboard',
       title: 'Micro-soldering BGA Repair',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
-      description: 'CPU replacement on damaged gaming laptop motherboard'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'CPU replacement on damaged gaming laptop motherboard',
+      is_active: true
     },
     {
-      id: 5,
+      id: '5',
       category: 'screens',
       title: 'iPad Air Screen & Digitizer',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
-      description: 'Shattered glass and non-responsive touch restored'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'Shattered glass and non-responsive touch restored',
+      is_active: true
     },
     {
-      id: 6,
+      id: '6',
       category: 'water',
       title: 'iPhone 12 Liquid Damage Recovery',
-      before: '/placeholder.svg',
-      after: '/placeholder.svg',
-      description: 'Ultrasonic cleaning and corrosion treatment'
+      image_url: '/placeholder.svg',
+      before_image_url: '/placeholder.svg',
+      after_image_url: '/placeholder.svg',
+      description: 'Ultrasonic cleaning and corrosion treatment',
+      is_active: true
     }
   ];
 
+  const displayItems = items.length > 0 ? items : fallbackGallery;
+  
   const filteredGallery = selectedCategory === 'all' 
-    ? repairGallery 
-    : repairGallery.filter(item => item.category === selectedCategory);
+    ? displayItems 
+    : displayItems.filter(item => item.category === selectedCategory);
 
   return (
     <main className="min-h-screen pt-20">
@@ -107,45 +125,57 @@ const Gallery = () => {
 
         {/* Gallery Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredGallery.map((item) => (
-            <div key={item.id} className="glass rounded-2xl overflow-hidden shadow-glass group">
-              
-              {/* Before/After Images */}
-              <div className="relative h-48 overflow-hidden">
-                <div className="absolute inset-0 flex">
-                  <div className="w-1/2 relative overflow-hidden">
-                    <img 
-                      src={item.before} 
-                      alt={`${item.title} - Before`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 left-2 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
-                      Before
-                    </div>
-                  </div>
-                  <div className="w-1/2 relative overflow-hidden">
-                    <img 
-                      src={item.after} 
-                      alt={`${item.title} - After`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-2 right-2 bg-green-500/90 text-white text-xs px-2 py-1 rounded">
-                      After
-                    </div>
-                  </div>
+          {loading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="glass rounded-2xl overflow-hidden shadow-glass">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-6">
+                  <Skeleton className="h-5 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full" />
                 </div>
+              </div>
+            ))
+          ) : (
+            filteredGallery.map((item) => (
+              <div key={item.id} className="glass rounded-2xl overflow-hidden shadow-glass group">
                 
-                {/* Divider Line */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/50 -translate-x-0.5" />
-              </div>
+                {/* Before/After Images */}
+                <div className="relative h-48 overflow-hidden">
+                  <div className="absolute inset-0 flex">
+                    <div className="w-1/2 relative overflow-hidden">
+                      <img 
+                        src={item.before_image_url || item.image_url || '/placeholder.svg'} 
+                        alt={`${item.title} - Before`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 bg-red-500/90 text-white text-xs px-2 py-1 rounded">
+                        Before
+                      </div>
+                    </div>
+                    <div className="w-1/2 relative overflow-hidden">
+                      <img 
+                        src={item.after_image_url || item.image_url || '/placeholder.svg'} 
+                        alt={`${item.title} - After`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-green-500/90 text-white text-xs px-2 py-1 rounded">
+                        After
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Divider Line */}
+                  <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/50 -translate-x-0.5" />
+                </div>
 
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Stats Section */}

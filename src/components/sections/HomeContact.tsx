@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
+import { useContactInfo } from '@/hooks/useContactInfo';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   MapPin, 
   Phone, 
@@ -20,6 +22,7 @@ const HomeContact = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
+  const { contactInfo, loading: contactLoading } = useContactInfo();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -116,28 +119,65 @@ const HomeContact = () => {
     });
   };
 
-  const contactInfo = [
+  // Fallback contact info for offline scenarios
+  const fallbackContactInfo = [
     {
-      icon: MapPin,
-      title: 'Visit Us',
-      details: ['123 Tech Street, Electronics Hub', 'Kolkata, West Bengal 700001']
+      id: '1',
+      type: 'address',
+      icon: 'MapPin',
+      label: 'Visit Us',
+      value: '123 Tech Street, Electronics Hub, Kolkata, West Bengal 700001',
+      is_active: true
     },
     {
-      icon: Phone,
-      title: 'Call Us',
-      details: ['+91 7003920793', 'Mon-Sat: 9 AM - 8 PM']
+      id: '2',
+      type: 'phone',
+      icon: 'Phone', 
+      label: 'Call Us',
+      value: '+91 7003920793',
+      is_active: true
     },
     {
-      icon: Envelope,
-      title: 'Email Us',
-      details: ['info@electrorepair.com', 'support@electrorepair.com']
+      id: '3',
+      type: 'email',
+      icon: 'Envelope',
+      label: 'Email Us', 
+      value: 'info@electrorepair.com',
+      is_active: true
     },
     {
-      icon: Clock,
-      title: 'Working Hours',
-      details: ['Monday - Saturday: 9 AM - 8 PM', 'Sunday: 10 AM - 6 PM']
+      id: '4',
+      type: 'hours',
+      icon: 'Clock',
+      label: 'Working Hours',
+      value: 'Monday - Saturday: 9 AM - 8 PM, Sunday: 10 AM - 6 PM',
+      is_active: true
     }
   ];
+
+  const getIcon = (iconName: string) => {
+    const icons: { [key: string]: any } = {
+      MapPin, Phone, Envelope, Clock
+    };
+    return icons[iconName] || MapPin;
+  };
+
+  const formatContactValue = (type: string, value: string) => {
+    switch (type) {
+      case 'address':
+        return value.split(', ').slice(0, 2);
+      case 'phone':
+        return [value, 'Mon-Sat: 9 AM - 8 PM'];
+      case 'email':
+        return [value, 'support@electrorepair.com'];
+      case 'hours':
+        return value.split(', ');
+      default:
+        return [value];
+    }
+  };
+
+  const displayContactInfo = contactInfo.length > 0 ? contactInfo : fallbackContactInfo;
 
   return (
     <section id="contact" ref={sectionRef} className="py-20 relative overflow-hidden">
@@ -243,26 +283,46 @@ const HomeContact = () => {
 
           {/* Contact Information */}
           <div ref={infoRef} className="space-y-8">
-            {contactInfo.map((info, index) => (
-              <div
-                key={index}
-                className="glass-subtle rounded-xl p-6 hover:glass transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-full bg-gradient-primary flex-shrink-0">
-                    <info.icon size={20} weight="bold" className="text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">{info.title}</h4>
-                    {info.details.map((detail, detailIndex) => (
-                      <p key={detailIndex} className="text-muted-foreground text-sm">
-                        {detail}
-                      </p>
-                    ))}
+            {contactLoading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="glass-subtle rounded-xl p-6">
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-28" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              displayContactInfo.map((info, index) => {
+                const IconComponent = getIcon(info.icon || 'MapPin');
+                const details = formatContactValue(info.type, info.value);
+                
+                return (
+                  <div
+                    key={info.id}
+                    className="glass-subtle rounded-xl p-6 hover:glass transition-all duration-300"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-full bg-gradient-primary flex-shrink-0">
+                        <IconComponent size={20} weight="bold" className="text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">{info.label}</h4>
+                        {details.map((detail, detailIndex) => (
+                          <p key={detailIndex} className="text-muted-foreground text-sm">
+                            {detail}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

@@ -3,6 +3,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'phosphor-react';
+import { useGalleryItems } from '@/hooks/useGalleryItems';
+import { Skeleton } from '@/components/ui/skeleton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,6 +12,7 @@ const HomeGallery = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const { items, loading } = useGalleryItems();
 
   useEffect(() => {
     gsap.fromTo(headingRef.current,
@@ -51,38 +54,59 @@ const HomeGallery = () => {
     };
   }, []);
 
-  const repairImages = [
+  // Fallback data for offline scenarios
+  const fallbackImages = [
     {
+      id: '1',
       title: 'iPhone Screen Repair',
       category: 'Mobile',
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop'
+      description: 'Professional screen replacement with genuine parts',
+      image_url: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop',
+      is_active: true
     },
     {
+      id: '2',
       title: 'Laptop Motherboard',
-      category: 'Laptop',
-      image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=300&fit=crop'
+      category: 'Laptop', 
+      description: 'Advanced motherboard repair and diagnostics',
+      image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&h=300&fit=crop',
+      is_active: true
     },
     {
+      id: '3',
       title: 'Tablet Display Fix',
       category: 'Tablet',
-      image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop'
+      description: 'Complete display assembly replacement',
+      image_url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop',
+      is_active: true
     },
     {
+      id: '4',
       title: 'Gaming Console',
       category: 'Console',
-      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=300&fit=crop'
+      description: 'Gaming console repair and maintenance',
+      image_url: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=300&fit=crop',
+      is_active: true
     },
     {
+      id: '5',
       title: 'Smart Watch Repair',
       category: 'Wearable',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop'
+      description: 'Precision repair for wearable devices',
+      image_url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop',
+      is_active: true
     },
     {
+      id: '6',
       title: 'Headphones Fix',
       category: 'Audio',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop'
+      description: 'Audio device repair and restoration',
+      image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+      is_active: true
     }
   ];
+
+  const displayItems = items.length > 0 ? items : fallbackImages;
 
   return (
     <section id="gallery" ref={sectionRef} className="py-20 relative overflow-hidden">
@@ -99,24 +123,40 @@ const HomeGallery = () => {
         </div>
 
         <div ref={galleryRef} className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-12">
-          {repairImages.map((item, index) => (
-            <div
-              key={index}
-              className="glass-subtle rounded-lg overflow-hidden hover:glass transition-all duration-300 group cursor-pointer"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                />
+          {loading ? (
+            // Loading skeletons
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="glass-subtle rounded-lg overflow-hidden">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <div className="p-4">
+                  <Skeleton className="h-3 w-16 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
               </div>
-              <div className="p-4">
-                <div className="text-xs text-primary font-medium mb-1">{item.category}</div>
-                <h3 className="font-semibold text-sm">{item.title}</h3>
+            ))
+          ) : (
+            displayItems.map((item, index) => (
+              <div
+                key={item.id}
+                className="glass-subtle rounded-lg overflow-hidden hover:glass transition-all duration-300 group cursor-pointer"
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-4">
+                  <div className="text-xs text-primary font-medium mb-1">{item.category}</div>
+                  <h3 className="font-semibold text-sm">{item.title}</h3>
+                  {item.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <div className="text-center">

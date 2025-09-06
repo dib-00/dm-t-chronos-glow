@@ -10,9 +10,23 @@ import {
   Phone,
   Calendar
 } from 'phosphor-react';
+import { useAboutContent } from '@/hooks/useAboutContent';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const About = () => {
   const navigate = useNavigate();
+  const { content, loading } = useAboutContent();
+  
+  // Get dynamic content from database or use fallback
+  const aboutContent = content.find(item => item.section_key === 'main') || {
+    title: 'About Dm T Repairs',
+    content: 'Your trusted electronics repair specialist with a passion for bringing devices back to life'
+  };
+
+  const missionContent = content.find(item => item.section_key === 'mission') || {
+    title: 'Our Mission',
+    content: 'To provide exceptional electronics repair services that combine technical expertise with genuine customer care. We\'re not just fixing devices – we\'re restoring connections, preserving memories, and empowering productivity.'
+  };
   
   const skills = [
     { icon: Wrench, title: "Micro-Soldering", description: "BGA rework & component-level repair" },
@@ -39,12 +53,21 @@ const About = () => {
         
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gradient mb-4">
-            About Dm T Repairs
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your trusted electronics repair specialist with a passion for bringing devices back to life
-          </p>
+          {loading ? (
+            <div>
+              <Skeleton className="h-12 w-2/3 mx-auto mb-4" />
+              <Skeleton className="h-6 w-1/2 mx-auto" />
+            </div>
+          ) : (
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-bold text-gradient mb-4">
+                {aboutContent.title}
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                {aboutContent.content}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Main Content */}
@@ -142,12 +165,20 @@ const About = () => {
 
         {/* Mission Statement */}
         <div className="glass rounded-2xl p-8 shadow-glass text-center mb-16">
-          <h2 className="text-2xl font-bold text-gradient mb-4">Our Mission</h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            To provide exceptional electronics repair services that combine technical expertise with 
-            genuine customer care. We're not just fixing devices – we're restoring connections, 
-            preserving memories, and empowering productivity.
-          </p>
+          {loading ? (
+            <div>
+              <Skeleton className="h-8 w-1/3 mx-auto mb-4" />
+              <Skeleton className="h-4 w-full max-w-3xl mx-auto mb-2" />
+              <Skeleton className="h-4 w-5/6 max-w-3xl mx-auto" />
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold text-gradient mb-4">{missionContent.title}</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                {missionContent.content}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Values Grid */}

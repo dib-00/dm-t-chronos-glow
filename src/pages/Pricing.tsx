@@ -130,9 +130,12 @@ const Pricing = () => {
                   ))}
                 </ul>
 
-                <Button className={`w-full ${
-                  card.is_popular ? 'bg-gradient-primary hover:shadow-glow' : 'variant-outline glass-subtle'
-                }`}>
+                <Button 
+                  className={`w-full ${
+                    card.is_popular ? 'bg-gradient-primary hover:shadow-glow' : 'variant-outline glass-subtle'
+                  }`}
+                  onClick={() => window.location.href = `/contact?service=${encodeURIComponent(card.name)}`}
+                >
                   Get Quote
                 </Button>
               </div>

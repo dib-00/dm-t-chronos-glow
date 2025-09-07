@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +31,7 @@ interface Service {
 }
 
 const Services = () => {
+  const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
@@ -298,7 +300,7 @@ const Services = () => {
                         variant="ghost" 
                         size="sm" 
                         className="group/btn p-0 h-auto text-primary hover:text-accent transition-colors duration-300"
-                        onClick={() => window.location.href = `/contact?service=${encodeURIComponent(service.title)}`}
+                        onClick={() => navigate(`/contact?service=${encodeURIComponent(service.title)}`)}
                       >
                         Book Now
                         <ArrowRight 

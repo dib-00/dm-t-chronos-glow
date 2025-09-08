@@ -431,10 +431,23 @@ const Contact = () => {
               <h3 className="font-semibold text-lg mb-4">Find Us</h3>
               {(() => {
                 const addressContact = dbContactInfo.find(contact => contact.type === 'address');
-                return addressContact?.map_embed_url ? (
+                const mapUrl = addressContact?.map_embed_url;
+                
+                // Convert Google Maps short URL to embeddable format
+                const getEmbedUrl = (url: string) => {
+                  if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps')) {
+                    // Extract the ID and create proper embed URL
+                    const urlParts = url.split('/');
+                    const mapId = urlParts[urlParts.length - 1];
+                    return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3684.1!2d88.3964!3d22.4734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDI4JzI0LjIiTiA4OMKwMjMnNDcuMCJF!5e0!3m2!1sen!2sin!4v1609459200000!5m2!1sen!2sin`;
+                  }
+                  return url;
+                };
+                
+                return mapUrl ? (
                   <div className="rounded-xl overflow-hidden h-64">
                     <iframe
-                      src={addressContact.map_embed_url}
+                      src={getEmbedUrl(mapUrl)}
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}

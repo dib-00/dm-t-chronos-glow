@@ -20,6 +20,9 @@ interface ContactInfo {
   is_primary: boolean;
   is_active: boolean;
   display_order: number;
+  map_embed_url?: string;
+  map_coordinates?: string;
+  map_address?: string;
   created_at: string;
   updated_at: string;
 }
@@ -39,11 +42,15 @@ const AdminContact = () => {
     is_primary: false,
     is_active: true,
     display_order: 0,
+    map_embed_url: '',
+    map_coordinates: '',
+    map_address: '',
   });
 
   const contactTypes = [
     { value: 'phone', label: 'Phone Number', icon: 'Phone' },
     { value: 'email', label: 'Email Address', icon: 'Mail' },
+    { value: 'whatsapp', label: 'WhatsApp', icon: 'Phone' },
     { value: 'address', label: 'Address', icon: 'MapPin' },
     { value: 'hours', label: 'Business Hours', icon: 'Clock' },
     { value: 'website', label: 'Website', icon: 'Globe' },
@@ -138,6 +145,9 @@ const AdminContact = () => {
       is_primary: contact.is_primary,
       is_active: contact.is_active,
       display_order: contact.display_order,
+      map_embed_url: contact.map_embed_url || '',
+      map_coordinates: contact.map_coordinates || '',
+      map_address: contact.map_address || '',
     });
     setDialogOpen(true);
   };
@@ -176,6 +186,9 @@ const AdminContact = () => {
       is_primary: false,
       is_active: true,
       display_order: 0,
+      map_embed_url: '',
+      map_coordinates: '',
+      map_address: '',
     });
   };
 
@@ -274,6 +287,38 @@ const AdminContact = () => {
                   required
                 />
               </div>
+
+              {formData.type === 'address' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="map_address">Map Address</Label>
+                    <Input
+                      id="map_address"
+                      value={formData.map_address}
+                      onChange={(e) => setFormData({ ...formData, map_address: e.target.value })}
+                      placeholder="Address to display on map"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="map_embed_url">Google Maps Embed URL</Label>
+                    <Input
+                      id="map_embed_url"
+                      value={formData.map_embed_url}
+                      onChange={(e) => setFormData({ ...formData, map_embed_url: e.target.value })}
+                      placeholder="https://www.google.com/maps/embed?pb=..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="map_coordinates">Map Coordinates (Lat,Lng)</Label>
+                    <Input
+                      id="map_coordinates"
+                      value={formData.map_coordinates}
+                      onChange={(e) => setFormData({ ...formData, map_coordinates: e.target.value })}
+                      placeholder="22.4734, 88.3963"
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="icon">Icon</Label>

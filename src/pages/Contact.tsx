@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useContactInfo } from '@/hooks/useContactInfo';
 import { 
   MapPin,
   Phone,
@@ -14,6 +15,7 @@ import {
 
 const Contact = () => {
   const { toast } = useToast();
+  const { contactInfo: dbContactInfo, loading: contactLoading } = useContactInfo();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -112,7 +114,8 @@ const Contact = () => {
     });
   };
 
-  const contactInfo = [
+  // Fallback contact info when database is unavailable
+  const fallbackContactInfo = [
     {
       icon: Phone,
       title: "Call Us",
@@ -142,6 +145,62 @@ const Contact = () => {
       action: "https://maps.google.com"
     }
   ];
+
+  // Helper functions
+  const getIcon = (iconName: string) => {
+    const iconMap: { [key: string]: any } = {
+      'Phone': Phone,
+      'WhatsappLogo': WhatsappLogo,
+      'EnvelopeSimple': EnvelopeSimple,
+      'MapPin': MapPin,
+      'Clock': Clock
+    };
+    return iconMap[iconName] || Phone;
+  };
+
+  const formatContactValue = (contact: any) => {
+    switch (contact.type) {
+      case 'phone':
+        return contact.value;
+      case 'email':
+        return contact.value;
+      case 'address':
+        return contact.map_address || contact.value;
+      case 'whatsapp':
+        return contact.value;
+      default:
+        return contact.value;
+    }
+  };
+
+  const getContactAction = (contact: any) => {
+    switch (contact.type) {
+      case 'phone':
+        return `tel:${contact.value}`;
+      case 'email':
+        return `mailto:${contact.value}`;
+      case 'whatsapp':
+        return `https://wa.me/${contact.value.replace(/\D/g, '')}`;
+      case 'address':
+        return contact.map_embed_url || 'https://maps.google.com';
+      default:
+        return '#';
+    }
+  };
+
+  // Use database contact info if available, otherwise use fallback
+  const contactInfo = contactLoading ? fallbackContactInfo : 
+    dbContactInfo.length > 0 ? dbContactInfo.map(contact => ({
+      icon: getIcon(contact.icon || 'Phone'),
+      title: contact.label || contact.type.charAt(0).toUpperCase() + contact.type.slice(1),
+      info: formatContactValue(contact),
+      subInfo: contact.type === 'phone' ? 'Mon-Sat 9AM-8PM' : 
+               contact.type === 'whatsapp' ? 'Quick response guaranteed' :
+               contact.type === 'email' ? 'We reply within 2 hours' :
+               contact.type === 'address' ? 'Near Metro Station, City Center' : '',
+      action: getContactAction(contact),
+      mapEmbedUrl: contact.map_embed_url
+    })) : fallbackContactInfo;
 
   const businessHours = [
     { day: "Monday - Saturday", time: "9:00 AM - 8:00 PM" },
@@ -339,35 +398,64 @@ const Contact = () => {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => window.open('https://wa.me/917003920793', '_blank')}
-              >
-                <WhatsappLogo size={20} weight="bold" className="mr-2" />
-                WhatsApp
-              </Button>
-              <Button 
-                variant="outline"
-                className="glass-subtle hover:glass"
-                onClick={() => window.open('tel:+917003920793')}
-              >
-                <Phone size={20} weight="bold" className="mr-2" />
-                Call Now
-              </Button>
+              {(() => {
+                const phoneContact = dbContactInfo.find(contact => contact.type === 'phone');
+                const whatsappContact = dbContactInfo.find(contact => contact.type === 'whatsapp');
+                const whatsappNumber = whatsappContact?.value || phoneContact?.value || '+917003920793';
+                const phoneNumber = phoneContact?.value || '+917003920793';
+                
+                return (
+                  <>
+                    <Button 
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => window.open(`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`, '_blank')}
+                    >
+                      <WhatsappLogo size={20} weight="bold" className="mr-2" />
+                      WhatsApp
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="glass-subtle hover:glass"
+                      onClick={() => window.open(`tel:${phoneNumber}`)}
+                    >
+                      <Phone size={20} weight="bold" className="mr-2" />
+                      Call Now
+                    </Button>
+                  </>
+                );
+              })()}
             </div>
 
-            {/* Map Placeholder */}
+            {/* Map Section */}
             <div className="glass rounded-xl p-6 shadow-glass">
               <h3 className="font-semibold text-lg mb-4">Find Us</h3>
-              <div className="bg-muted/20 rounded-xl h-48 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin size={32} className="text-primary mx-auto mb-2" weight="bold" />
-                  <p className="text-sm text-muted-foreground">Interactive map coming soon</p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Get Directions
-                  </Button>
-                </div>
-              </div>
+              {(() => {
+                const addressContact = dbContactInfo.find(contact => contact.type === 'address');
+                return addressContact?.map_embed_url ? (
+                  <div className="rounded-xl overflow-hidden h-64">
+                    <iframe
+                      src={addressContact.map_embed_url}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Business Location"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-muted/20 rounded-xl h-48 flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin size={32} className="text-primary mx-auto mb-2" weight="bold" />
+                      <p className="text-sm text-muted-foreground">Interactive map coming soon</p>
+                      <Button variant="outline" size="sm" className="mt-2">
+                        Get Directions
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

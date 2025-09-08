@@ -10,6 +10,9 @@ interface ContactInfo {
   is_primary: boolean;
   is_active: boolean;
   display_order?: number;
+  map_embed_url?: string;
+  map_coordinates?: string;
+  map_address?: string;
 }
 
 export const useContactInfo = () => {

@@ -59,6 +59,9 @@ export type Database = {
           is_active: boolean
           is_primary: boolean
           label: string | null
+          map_address: string | null
+          map_coordinates: string | null
+          map_embed_url: string | null
           type: string
           updated_at: string
           value: string
@@ -71,6 +74,9 @@ export type Database = {
           is_active?: boolean
           is_primary?: boolean
           label?: string | null
+          map_address?: string | null
+          map_coordinates?: string | null
+          map_embed_url?: string | null
           type: string
           updated_at?: string
           value: string
@@ -83,6 +89,9 @@ export type Database = {
           is_active?: boolean
           is_primary?: boolean
           label?: string | null
+          map_address?: string | null
+          map_coordinates?: string | null
+          map_embed_url?: string | null
           type?: string
           updated_at?: string
           value?: string
